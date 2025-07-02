@@ -37,16 +37,19 @@ public class OrderController {
 		return orders;
 	}
 
-	@PutMapping("/update")
-	public ResponseEntity<OrderDto> updateOrder(@RequestBody OrderDto dto) {
-		ResponseEntity<OrderDto> updated = orderService.updateOrder(dto);
-		return updated;
+	@PutMapping("/{orderId}/status")
+	public ResponseEntity<OrderDto> updateOrderStatus(
+			@PathVariable("orderId") Long orderId,
+			@RequestParam("status") String status) {
+		ResponseEntity<OrderDto> updatedOrder = orderService.updateOrderStatus(orderId, status);
+		return updatedOrder;
 	}
-	
-//	@PutMapping("/cancel/{orderId}")
-//	public ResponseEntity<OrderDto> deleteOrder(@PathVariable("orderId") Long OrderId) {
-//		ResponseEntity<OrderDto> orderDto = orderService.deleteOrder(OrderId);
-//		return orderDto;
-//	}
 
+
+	//Optional
+	@PutMapping("/cancel/{orderId}")
+	public ResponseEntity<OrderDto> cancelOrder(@PathVariable("orderId") Long OrderId) {
+		ResponseEntity<OrderDto> orderDto = orderService.cancelOrder(OrderId);
+		return orderDto;
+	}
 }

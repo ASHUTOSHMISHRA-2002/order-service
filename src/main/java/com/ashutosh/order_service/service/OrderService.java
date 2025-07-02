@@ -9,5 +9,6 @@ public interface OrderService {
     ResponseEntity<OrderDto> placeOrder(OrderDto dto);
     ResponseEntity<OrderDto> trackOrder(Long orderId);
     ResponseEntity<List<OrderDto>> getAllOrders();
-	ResponseEntity<OrderDto> updateOrder(OrderDto dto);
+    ResponseEntity<OrderDto> updateOrderStatus(Long orderId, String status);
+    ResponseEntity<OrderDto> cancelOrder(Long orderId);
 }

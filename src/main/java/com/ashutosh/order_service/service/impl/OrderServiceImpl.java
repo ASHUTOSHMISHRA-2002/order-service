@@ -77,27 +77,54 @@ public class OrderServiceImpl implements OrderService {
     }
     
     @Override
-    public ResponseEntity<OrderDto> updateOrder(OrderDto dto) {
-        Order order = orderRepository.findById(dto.getOrderId()).get();
+    public ResponseEntity<OrderDto> updateOrderStatus(Long orderId, String status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
 
-        order.setCustomerId(dto.getCustomerId());
-        order.setRestaurantId(dto.getRestaurantId());
-        order.setTotalAmount(dto.getTotalAmount());
-        order.setStatus(dto.getStatus());
+        OrderStatus newStatus;
+        try {
+            newStatus = OrderStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid order status: " + status);
+        }
 
+        order.setStatus(newStatus);
         Order updated = orderRepository.save(order);
 
-        OrderDto response =  new OrderDto(
-            updated.getOrderId(),
-            updated.getCustomerId(),
-            updated.getRestaurantId(),
-            updated.getStatus(),
-            updated.getTotalAmount()
+        OrderDto response = new OrderDto(
+                updated.getOrderId(),
+                updated.getCustomerId(),
+                updated.getRestaurantId(),
+                updated.getStatus(),
+                updated.getTotalAmount()
         );
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
 
-    
+    @Override
+    public ResponseEntity<OrderDto> cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
+
+        if (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.ACCEPTED) {
+            throw new IllegalStateException("Order cannot be cancelled at this stage: " + order.getStatus());
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        Order cancelled = orderRepository.save(order);
+
+        OrderDto response = new OrderDto(
+                cancelled.getOrderId(),
+                cancelled.getCustomerId(),
+                cancelled.getRestaurantId(),
+                cancelled.getStatus(),
+                cancelled.getTotalAmount()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
 }
